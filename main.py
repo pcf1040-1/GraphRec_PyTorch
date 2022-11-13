@@ -28,6 +28,11 @@ from utils import collate_fn
 from model import GraphRec
 from dataloader import GRDataset
 
+from ray import tune
+from ray.air import session
+from ray.tune import CLIReporter
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_path', default='datasets/Epinions/', help='dataset directory path: datasets/Ciao/Epinions')
 parser.add_argument('--batch_size', type=int, default=256, help='input batch size')
@@ -42,6 +47,61 @@ print(args)
 
 here = os.path.dirname(os.path.abspath(__file__))
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+def grid_search(train_loader, model, optimizer, epoch, num_epochs, valid_loader):
+    search_space = {
+    "train_loader": train_loader,
+    "model": model,
+    "optimizer": optimizer,
+    "epoch": epoch,
+    "num_epochs": num_epochs,
+    "mean": tune.grid_search(["mean", "sum"]),
+    "delta": tune.grid_search([0.1, 1, 10]),
+    "valid_loader": valid_loader
+    }
+    tuner = tune.Tuner(
+        train_huber,
+        param_space=search_space,
+        tune_config=tune.TuneConfig(metric = "score", mode = "min"),
+        #metric="loss",
+        #mode="min",
+        #resources_per_trial={"cpu": 1},
+        #progress_reporter=reporter,
+        )
+    result = tuner.fit()
+    print("printing result for tuner: ",result.get_best_result(metric="score", mode="min").config)
+    return result
+
+def train_huber(config, checkpoint_dir = None):
+    model = config["model"].to(torch.device('cpu'))
+    optimizer = config["optimizer"]
+    #criterion = config["criterion"]
+    criterion = nn.HuberLoss(reduction = config["mean"], delta = config["delta"])
+    trainForEpoch(config["train_loader"], model, optimizer, 
+    config["epoch"], config["num_epochs"], criterion, log_aggr = 100)
+    mae, rmse = validate(config["valid_loader"], model)
+    tune.report({"score":mae})
+    return {"score": mae}
+    #with tune.checkpoint_dir(config["epoch"]) as checkpoint_dir:
+    #    state_dict = torch.load(args.model, map_location='cpu')
+    #    path = os.path.join(checkpoint_dir, "checkpoint")
+    #    torch.save((state_dict, optimizer.state_dict()), path)
+
+    #tune.report(loss=(mae))
+
+def search():
+    search_space = {
+    "a": tune.grid_search([0.001, 0.01, 0.1, 1.0]),
+    "b": tune.choice([1, 2, 3]),
+    }
+    tuner = tune.Tuner(objective, param_space=search_space)
+    results = tuner.fit()
+    print(results.get_best_result(metric="score", mode="min").config)
+    return results
+
+def objective(config):
+    score = config["a"] ** 2 + config["b"]
+    return {"score": score}
 
 def main():
     print('Loading data...')
@@ -75,14 +135,24 @@ def main():
         return
 
     optimizer = optim.RMSprop(model.parameters(), args.lr)
-    criterion = nn.MSELoss()
+    criterion = nn.HuberLoss(reduction = 'mean', delta = 1.0)
+
     scheduler = StepLR(optimizer, step_size = args.lr_dc_step, gamma = args.lr_dc)
+    #result = grid_search(train_loader, model, optimizer, None, 1)
+    #best_trial = result.get_best_trial("loss", "min", "last")
+    #print("Best trial config: {}".format(best_trial.config))
+    #print("Best trial final validation loss: {}".format(
+    #    best_trial.last_result["loss"]))
+    #print("Best trial final validation accuracy: {}".format(
+    #    best_trial.last_result["accuracy"]))
 
     for epoch in tqdm(range(args.epoch)):
+        result = grid_search(train_loader, model, optimizer, epoch, 1)
+        best_trial = result.get_best_trial("loss")
+        #print("Best trial config: {}".format(best_trial.config))
         # train for one epoch
         scheduler.step(epoch = epoch)
         trainForEpoch(train_loader, model, optimizer, epoch, args.epoch, criterion, log_aggr = 100)
-
         mae, rmse = validate(valid_loader, model)
 
         # store best loss and save a model checkpoint
