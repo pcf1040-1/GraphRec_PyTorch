@@ -55,7 +55,7 @@ def grid_search(train_loader, model, optimizer, epoch, num_epochs, valid_loader)
     "optimizer": optimizer,
     "epoch": epoch,
     "num_epochs": num_epochs,
-    "mean": tune.grid_search(["mean", "sum"]),
+    "mean": 'none',
     "delta": tune.grid_search([0.1, 1, 10]),
     "valid_loader": valid_loader
     }
@@ -73,10 +73,10 @@ def grid_search(train_loader, model, optimizer, epoch, num_epochs, valid_loader)
     return result
 
 def train_huber(config, checkpoint_dir = None):
-    model = config["model"].to(torch.device('cpu'))
+    model = config["model"]#.to(torch.device('cpu'))
     optimizer = config["optimizer"]
     #criterion = config["criterion"]
-    criterion = nn.HuberLoss(reduction = config["mean"], delta = config["delta"])
+    criterion = nn.HuberLoss(reduction = 'mean', delta = config["delta"])
     trainForEpoch(config["train_loader"], model, optimizer, 
     config["epoch"], config["num_epochs"], criterion, log_aggr = 100)
     mae, rmse = validate(config["valid_loader"], model)
@@ -138,16 +138,9 @@ def main():
     criterion = nn.HuberLoss(reduction = 'mean', delta = 1.0)
 
     scheduler = StepLR(optimizer, step_size = args.lr_dc_step, gamma = args.lr_dc)
-    #result = grid_search(train_loader, model, optimizer, None, 1)
-    #best_trial = result.get_best_trial("loss", "min", "last")
-    #print("Best trial config: {}".format(best_trial.config))
-    #print("Best trial final validation loss: {}".format(
-    #    best_trial.last_result["loss"]))
-    #print("Best trial final validation accuracy: {}".format(
-    #    best_trial.last_result["accuracy"]))
 
     for epoch in tqdm(range(args.epoch)):
-        result = grid_search(train_loader, model, optimizer, epoch, 1)
+        result = grid_search(train_loader, model, optimizer, epoch, 1, valid_loader)
         best_trial = result.get_best_trial("loss")
         #print("Best trial config: {}".format(best_trial.config))
         # train for one epoch
