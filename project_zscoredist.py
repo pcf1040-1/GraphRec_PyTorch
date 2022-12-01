@@ -16,11 +16,11 @@ def plot_z_score(df):
 
 def read_data(Ciao = False, Epinion = False):
     if Epinion:
-        df = pd.read_csv('/home/stu11/s8/yw6228/Desktop/ml2022/GraphRec_PyTorch/datasets/Epinions/ratings_data.txt', 
+        df = pd.read_csv('./datasets/Epinions/ratings_data.txt', 
         sep=' ', header=None, names=["user", "item", "rating"])
         return df
     elif Ciao:
-        mat = loadmat('/home/stu11/s8/yw6228/Desktop/ml2022/GraphRec_PyTorch/datasets/Ciao/rating.mat')
+        mat = loadmat('./datasets/Ciao/rating.mat')
         mat = {k:v for k, v in mat.items() if k[0] != '_'}
         df = pd.DataFrame({k: np.array(v).flatten() for k, v in mat.items()})
         return df
