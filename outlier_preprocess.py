@@ -35,7 +35,6 @@ def subset_outlier(path, fn, threshold):
 		# compute z score
 		df_user = df.groupby(['user'])['rating'].mean().reset_index(name='average_rating')
 		df_user['zscore'] = zscore(df_user['average_rating'])
-
 		print(df_user)
 
 		# include a user id only if within threshold
@@ -43,13 +42,10 @@ def subset_outlier(path, fn, threshold):
 		for index, row in df_user.iterrows():
 			if abs(row['zscore']) <= threshold:
 				subset.append(row['user'])
-			# else:
-			# 	subset[row['user']] = False
 		
 		print(len(subset))
 
 		df = df.join(df_user.set_index('user'), on='user')
-		# print(df[df["user"]==1])
 		print(df)
 
 		new_df = df[abs(df['zscore']) <= 1]
@@ -76,7 +72,6 @@ parser.add_argument('--test', action='store_true', help='test')
 args = parser.parse_args()
 
 def main():
-	print("Hello World")
 	subset_outlier('datasets/Epinions/', 'dataset.pkl', 1)
 
 	print('Loading data...')
@@ -95,7 +90,6 @@ def main():
 
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	model = GraphRec(user_count+1, item_count+1, rate_count+1, 64).to(device)
-	
 	
 	# testing with subset
 	print('Load checkpoint and testing...')
