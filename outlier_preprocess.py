@@ -75,7 +75,7 @@ def main():
 	subset_outlier('datasets/Epinions/', 'dataset.pkl', 1)
 
 	print('Loading data...')
-	with open('datasets/Epinions/' + 'dataset.pkl', 'rb') as f:
+	with open('datasets/Epinions/' + 'dataset_zscore_1.pkl', 'rb') as f:
 		test_set = pickle.load(f)
 		
 	with open('datasets/Epinions/' + 'list.pkl', 'rb') as f:
