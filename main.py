@@ -80,7 +80,7 @@ def main():
         return
 
     optimizer = optim.RMSprop(model.parameters(), args.lr)
-    criterion = nn.mse()
+    criterion = nn.MSELoss()
 
     scheduler = StepLR(optimizer, step_size = args.lr_dc_step, gamma = args.lr_dc)
 
