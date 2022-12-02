@@ -48,7 +48,7 @@ def subset_outlier(path, fn, threshold):
 		df = df.join(df_user.set_index('user'), on='user')
 		print(df)
 
-		new_df = df[abs(df['zscore']) <= 1]
+		new_df = df[abs(df['zscore']) <= 1].reset_index()
 		print(new_df)
 		new_df = new_df[['user', 'item', 'rating']]
 		print(new_df)
