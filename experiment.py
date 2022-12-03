@@ -4,6 +4,7 @@
 Created on 30 Sep, 2019
 
 @author: wangshuo
+@author: Patrick Flynn
 """
 
 import os
@@ -28,8 +29,13 @@ from utils import collate_fn
 from model import GraphRec
 from dataloader import GRDataset
 
+from ray import tune
+from ray.air import session
+from ray.tune import CLIReporter
+
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset_path', default='dataset/Ciao/', help='dataset directory path: datasets/Ciao/Epinions')
+parser.add_argument('--dataset_path', default='datasets/Epinions/', help='dataset directory path: datasets/Ciao/Epinions')
 parser.add_argument('--batch_size', type=int, default=256, help='input batch size')
 parser.add_argument('--embed_dim', type=int, default=64, help='the dimension of embedding')
 parser.add_argument('--epoch', type=int, default=30, help='the number of epochs to train for')
@@ -37,6 +43,9 @@ parser.add_argument('--lr', type=float, default=0.001, help='learning rate')  # 
 parser.add_argument('--lr_dc', type=float, default=0.1, help='learning rate decay rate')
 parser.add_argument('--lr_dc_step', type=int, default=30, help='the number of steps after which the learning rate decay')
 parser.add_argument('--test', action='store_true', help='test')
+parser.add_argument('--loss_func', default='MSE', help='loss function to use during training [MSE|huber]')
+parser.add_argument('--delta', type=float, default='1.0', help='delta hyperparameter for Huber loss')
+parser.add_argument('--checkpoint', default='best_checkpoint.pth.tar', help = 'checkpoint to start at.')
 args = parser.parse_args()
 print(args)
 
@@ -68,21 +77,36 @@ def main():
 
     if args.test:
         print('Load checkpoint and testing...')
-        ckpt = torch.load('best_checkpoint.pth.tar')
+        ckpt = torch.load(args.checkpoint)
         model.load_state_dict(ckpt['state_dict'])
         mae, rmse = validate(test_loader, model)
         print("Test: MAE: {:.4f}, RMSE: {:.4f}".format(mae, rmse))
         return
 
-    optimizer = optim.RMSprop(model.parameters(), args.lr)
-    criterion = nn.MSELoss()
+    optimizer = optim.RMSprop(model.parameters(), args.lr) 
+
+
+    if(args.delta < 0.0):
+        print('Error: delta must be positive')
+        exit(-1)
+
+
+
+    if(args.loss_func.lower() == 'mse'):
+        criterion = nn.MSELoss()
+    elif(args.loss_func.lower() == 'huber'):
+        criterion = nn.HuberLoss(delta=args.delta)
+    else:
+        print('Error: loss function must be MSE or Huber')
+        exit(-1)
+    
+
     scheduler = StepLR(optimizer, step_size = args.lr_dc_step, gamma = args.lr_dc)
 
     for epoch in tqdm(range(args.epoch)):
         # train for one epoch
         scheduler.step(epoch = epoch)
         trainForEpoch(train_loader, model, optimizer, epoch, args.epoch, criterion, log_aggr = 100)
-
         mae, rmse = validate(valid_loader, model)
 
         # store best loss and save a model checkpoint
@@ -92,13 +116,13 @@ def main():
             'optimizer': optimizer.state_dict()
         }
 
-        torch.save(ckpt_dict, 'latest_checkpoint.pth.tar')
+        torch.save(ckpt_dict, './training_results/latest_checkpoint'+args.loss_func+str(args.delta)+'.pth.tar')
 
         if epoch == 0:
             best_mae = mae
         elif mae < best_mae:
             best_mae = mae
-            torch.save(ckpt_dict, 'best_checkpoint.pth.tar')
+            torch.save(ckpt_dict, './training_results/best_checkpoint'+args.loss_func+str(args.delta)+'.pth.tar')
 
         print('Epoch {} validation: MAE: {:.4f}, RMSE: {:.4f}, Best MAE: {:.4f}'.format(epoch, mae, rmse, best_mae))
 
