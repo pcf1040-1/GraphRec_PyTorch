@@ -2,7 +2,7 @@
 
 # compute z score
 
-# add the line only if zscore is in threshold
+# select the rows only if within the threshold
 
 # save the new pickle file in path
 
@@ -55,8 +55,6 @@ def subset_outlier(path, fn, new_fn, threshold,):
 
 
 def test_subset(path, fn):
-	# subset_outlier('datasets/Epinions/', 'dataset.pkl', 2)
-
 	print('Loading data...')
 	with open(path + fn, 'rb') as f:
 		test_set = pickle.load(f)
