@@ -114,13 +114,13 @@ def main():
             'optimizer': optimizer.state_dict()
         }
 
-        torch.save(ckpt_dict, 'latest_checkpoint.pth.tar')
+        torch.save(ckpt_dict, 'latest_checkpoint'+'args.loss_func'+'args.delta'+'.pth.tar')
 
         if epoch == 0:
             best_mae = mae
         elif mae < best_mae:
             best_mae = mae
-            torch.save(ckpt_dict, 'best_checkpoint.pth.tar')
+            torch.save(ckpt_dict, 'best_checkpoint'+'args.loss_func'+'args.delta'+'.pth.tar')
 
         print('Epoch {} validation: MAE: {:.4f}, RMSE: {:.4f}, Best MAE: {:.4f}'.format(epoch, mae, rmse, best_mae))
 
