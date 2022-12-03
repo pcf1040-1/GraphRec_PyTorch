@@ -36,6 +36,7 @@ from ray.tune import CLIReporter
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_path', default='datasets/Epinions/', help='dataset directory path: datasets/Ciao/Epinions')
+parser.add_argument('--data_name', default='dataset.pkl', help='name of the dataset pkl file to use')
 parser.add_argument('--batch_size', type=int, default=256, help='input batch size')
 parser.add_argument('--embed_dim', type=int, default=64, help='the dimension of embedding')
 parser.add_argument('--epoch', type=int, default=30, help='the number of epochs to train for')
@@ -54,9 +55,10 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def main():
     print('Loading data...')
-    with open(args.dataset_path + 'dataset.pkl', 'rb') as f:
-        train_set = pickle.load(f)
-        valid_set = pickle.load(f)
+    with open(args.dataset_path + args.data_name, 'rb') as f:
+        if not args.test:
+            train_set = pickle.load(f)
+            valid_set = pickle.load(f)
         test_set = pickle.load(f)
 
     with open(args.dataset_path + 'list.pkl', 'rb') as f:
@@ -66,11 +68,13 @@ def main():
         i_users_list = pickle.load(f)
         (user_count, item_count, rate_count) = pickle.load(f)
     
-    train_data = GRDataset(train_set, u_items_list, u_users_list, u_users_items_list, i_users_list)
-    valid_data = GRDataset(valid_set, u_items_list, u_users_list, u_users_items_list, i_users_list)
+    if not args.test:
+        train_data = GRDataset(train_set, u_items_list, u_users_list, u_users_items_list, i_users_list)
+        valid_data = GRDataset(valid_set, u_items_list, u_users_list, u_users_items_list, i_users_list)
+        train_loader = DataLoader(train_data, batch_size = args.batch_size, shuffle = True, collate_fn = collate_fn)
+        valid_loader = DataLoader(valid_data, batch_size = args.batch_size, shuffle = False, collate_fn = collate_fn)
+
     test_data = GRDataset(test_set, u_items_list, u_users_list, u_users_items_list, i_users_list)
-    train_loader = DataLoader(train_data, batch_size = args.batch_size, shuffle = True, collate_fn = collate_fn)
-    valid_loader = DataLoader(valid_data, batch_size = args.batch_size, shuffle = False, collate_fn = collate_fn)
     test_loader = DataLoader(test_data, batch_size = args.batch_size, shuffle = False, collate_fn = collate_fn)
 
     model = GraphRec(user_count+1, item_count+1, rate_count+1, args.embed_dim).to(device)
