@@ -12,9 +12,12 @@ class GRDataset(Dataset):
 		self.i_users_list = i_users_list
 
 	def __getitem__(self, index):
-		uid = self.data[self.data.columns[0]][index]
-		iid = self.data[self.data.columns[1]][index]
-		label = self.data[self.data.columns[2]][index]
+		# uid = self.data[self.data.columns[0]][index]
+		# iid = self.data[self.data.columns[1]][index]
+		# label = self.data[self.data.columns[2]][index]
+		uid = self.data[index][0]
+		iid = self.data[index][1]
+		label = self.data[index][2]
 		u_items = self.u_items_list[uid]
 		u_users = self.u_users_list[uid]
 		u_users_items = self.u_users_items_list[uid]
