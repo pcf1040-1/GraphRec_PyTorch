@@ -47,6 +47,7 @@ def subset_outlier(path, fn, new_fn, threshold,):
 		new_df = df[abs(df['zscore']) <= 1].reset_index()
 		# print(new_df)
 		new_df = new_df[['user', 'item', 'rating']]
+		print(new_df)
 		# print(new_df)
 
 		# save the pickle file

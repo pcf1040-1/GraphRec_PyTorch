@@ -42,6 +42,8 @@ parser.add_argument('--lr', type=float, default=0.001, help='learning rate')  # 
 parser.add_argument('--lr_dc', type=float, default=0.1, help='learning rate decay rate')
 parser.add_argument('--lr_dc_step', type=int, default=30, help='the number of steps after which the learning rate decay')
 parser.add_argument('--test', action='store_true', help='test')
+parser.add_argument('--loss_func', default='MSE', help='loss function to use during training [MSE|huber]')
+parser.add_argument('--delta', type=float, default='1.0', help='delta hyperparameter for Huber loss')
 args = parser.parse_args()
 print(args)
 
@@ -80,7 +82,22 @@ def main():
         return
 
     optimizer = optim.RMSprop(model.parameters(), args.lr)
-    criterion = nn.MSELoss()
+
+
+    if(args.delta < 0.0):
+        print('Error: delta must be positive')
+        exit(-1)
+
+
+
+    if(args.loss_func.lower() == 'mse'):
+        criterion = nn.MSELoss()
+    elif(args.loss_func.lower() == 'huber'):
+        criterion = nn.HuberLoss(delta=args.delta)
+    else:
+        print('Error: loss function must be MSE or Huber')
+        exit(-1)
+    
 
     scheduler = StepLR(optimizer, step_size = args.lr_dc_step, gamma = args.lr_dc)
 
@@ -97,13 +114,13 @@ def main():
             'optimizer': optimizer.state_dict()
         }
 
-        torch.save(ckpt_dict, 'latest_checkpoint.pth.tar')
+        torch.save(ckpt_dict, 'latest_checkpoint'+'args.loss_func'+'args.delta'+'.pth.tar')
 
         if epoch == 0:
             best_mae = mae
         elif mae < best_mae:
             best_mae = mae
-            torch.save(ckpt_dict, 'best_checkpoint.pth.tar')
+            torch.save(ckpt_dict, 'best_checkpoint'+'args.loss_func'+'args.delta'+'.pth.tar')
 
         print('Epoch {} validation: MAE: {:.4f}, RMSE: {:.4f}, Best MAE: {:.4f}'.format(epoch, mae, rmse, best_mae))
 
