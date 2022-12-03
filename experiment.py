@@ -29,10 +29,6 @@ from utils import collate_fn
 from model import GraphRec
 from dataloader import GRDataset
 
-from ray import tune
-from ray.air import session
-from ray.tune import CLIReporter
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_path', default='datasets/Epinions/', help='dataset directory path: datasets/Ciao/Epinions')
