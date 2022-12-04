@@ -85,6 +85,7 @@ def main():
             for fn in os.listdir('training_results/'):
                 if fn.startswith('best'):
                     fn_list.append(fn)
+        fn_list.sort()
         
         for fn in fn_list:
             print("Test on: " + fn)
