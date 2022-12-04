@@ -10,15 +10,21 @@ import pandas as pd
 import pickle
 import numpy as np
 import torch
+import argparse
 from scipy.stats import zscore
 from dataloader import GRDataset
 from torch.utils.data import DataLoader
 from utils import collate_fn
-from model import GraphRec
-from main import validate
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--dataset_path', default='datasets/Epinions/', help='dataset directory path: datasets/Ciao/Epinions')
+parser.add_argument('--threshold', default=1, nargs="+", type=float, help='threshold for zscore of subset, take a list as input')
+parser.add_argument('--greater_or_less', default='less', help='determine to include the data if the absolute value of zscore is greater or less')
+parser.add_argument('--data_name', default='dataset.pkl', help='name of the dataset pkl file to use')
+args = parser.parse_args()
+print(args)
 
-def subset_outlier(path, fn, new_fn, threshold,):
+def subset_outlier(path, fn, threshold,):
 	with open(path + fn, 'rb') as f:
 		print("open file")
 		train_set = pickle.load(f)
@@ -26,12 +32,10 @@ def subset_outlier(path, fn, new_fn, threshold,):
 		test_set = pickle.load(f)
 
 		df = pd.DataFrame(test_set, columns = ["user", "item", "rating"])
-		# print(df)
 
 		# compute z score
 		df_user = df.groupby(['user'])['rating'].mean().reset_index(name='average_rating')
 		df_user['zscore'] = zscore(df_user['average_rating'])
-		# print(df_user)
 
 		# include a user id only if within threshold
 		subset = []
@@ -39,58 +43,26 @@ def subset_outlier(path, fn, new_fn, threshold,):
 			if abs(row['zscore']) <= threshold:
 				subset.append(row['user'])
 		
-		# print(len(subset))
-
 		df = df.join(df_user.set_index('user'), on='user')
-		# print(df)
 
-		new_df = df[abs(df['zscore']) <= 1].reset_index()
-		# print(new_df)
+		if args.greater_or_less=='less':
+			new_df = df[abs(df['zscore']) <= 1].reset_index()
+		elif args.greater_or_less=='greater':
+			new_df = df[abs(df['zscore']) <= 1].reset_index()
+
 		new_df = new_df[['user', 'item', 'rating']]
-		print(new_df)
-		# print(new_df)
 
 		# save the pickle file
+		new_fn = 'dataset_subset_' + args.greater_or_less + str(threshold) + '.pkl'
 		with open(path + new_fn, 'wb') as n_f:
+			print("Saving file in " + path + new_fn +'...')
 			pickle.dump(new_df, n_f, pickle.HIGHEST_PROTOCOL)
-
-
-def test_subset(path, fn):
-	print('Loading data...')
-	with open(path + fn, 'rb') as f:
-		test_set = pickle.load(f)
-		
-	with open(path + 'list.pkl', 'rb') as f:
-		u_items_list = pickle.load(f)
-		u_users_list = pickle.load(f)
-		u_users_items_list = pickle.load(f)
-		i_users_list = pickle.load(f)
-		(user_count, item_count, rate_count) = pickle.load(f)
-	
-	test_set = test_set.values.tolist()	# convert dataframe to list (to input correct format for GRdataset)
-
-	test_data = GRDataset(test_set, u_items_list, u_users_list, u_users_items_list, i_users_list)
-	test_loader = DataLoader(test_data, batch_size = 256, shuffle = False, collate_fn = collate_fn)
-
-	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-	model = GraphRec(user_count+1, item_count+1, rate_count+1, 64).to(device)
-	
-	# testing with subset
-	print('Load checkpoint and testing...')
-	ckpt = torch.load('latest_checkpoint.pth.tar')
-	model.load_state_dict(ckpt['state_dict'])
-	mae, rmse = validate(test_loader, model)
-	print("Test: MAE: {:.4f}, RMSE: {:.4f}".format(mae, rmse))
 
 
 def main():
 	# Run test for Epinions
-	subset_outlier(path='datasets/Epinions/', fn='dataset.pkl', new_fn='dataset_subset_1.pkl', threshold=1)
-	test_subset(path='datasets/Epinions/', fn='dataset_subset_1.pkl')
-
-	# Run test for Ciao
-	# subset_outlier(path='datasets/Ciao/', fn='dataset.pkl', new_fn='dataset_subset_1.pkl', threshold=1)
-	# test_subset(path='datasets/Ciao/', fn='dataset_subset_1.pkl')
+	for thr in args.threshold:
+		subset_outlier(path=args.dataset_path, fn=args.data_name, threshold=thr)
 	
 if __name__ == '__main__':
     main()

@@ -32,7 +32,7 @@ from dataloader import GRDataset
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_path', default='datasets/Epinions/', help='dataset directory path: datasets/Ciao/Epinions')
-parser.add_argument('--data_name', default='dataset.pkl', help='name of the dataset pkl file to use')
+parser.add_argument('--data_name', default='dataset.pkl', help='name of the dataset pkl file to use.')
 parser.add_argument('--batch_size', type=int, default=256, help='input batch size')
 parser.add_argument('--embed_dim', type=int, default=64, help='the dimension of embedding')
 parser.add_argument('--epoch', type=int, default=30, help='the number of epochs to train for')
@@ -40,9 +40,10 @@ parser.add_argument('--lr', type=float, default=0.001, help='learning rate')  # 
 parser.add_argument('--lr_dc', type=float, default=0.1, help='learning rate decay rate')
 parser.add_argument('--lr_dc_step', type=int, default=30, help='the number of steps after which the learning rate decay')
 parser.add_argument('--test', action='store_true', help='test')
+parser.add_argument('--test_subset', action='store_true', help='test subset files')
 parser.add_argument('--loss_func', default='MSE', help='loss function to use during training [MSE|huber]')
 parser.add_argument('--delta', type=float, default='1.0', help='delta hyperparameter for Huber loss')
-parser.add_argument('--checkpoint', default='best_checkpoint.pth.tar', help = 'checkpoint to start at.')
+parser.add_argument('--checkpoint', default=[], type=list, help = 'checkpoint to start at, defaults starts all the best checkpoints')
 args = parser.parse_args()
 print(args)
 
@@ -52,10 +53,11 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def main():
     print('Loading data...')
     with open(args.dataset_path + args.data_name, 'rb') as f:
-        if not args.test:
+        if not args.test_subset:
             train_set = pickle.load(f)
             valid_set = pickle.load(f)
         test_set = pickle.load(f)
+        test_set = test_set.values.tolist()	# convert dataframe to list (to input correct format for GRdataset)
 
     with open(args.dataset_path + 'list.pkl', 'rb') as f:
         u_items_list = pickle.load(f)
@@ -64,7 +66,7 @@ def main():
         i_users_list = pickle.load(f)
         (user_count, item_count, rate_count) = pickle.load(f)
     
-    if not args.test:
+    if not args.test and not args.test_subset:
         train_data = GRDataset(train_set, u_items_list, u_users_list, u_users_items_list, i_users_list)
         valid_data = GRDataset(valid_set, u_items_list, u_users_list, u_users_items_list, i_users_list)
         train_loader = DataLoader(train_data, batch_size = args.batch_size, shuffle = True, collate_fn = collate_fn)
@@ -75,12 +77,22 @@ def main():
 
     model = GraphRec(user_count+1, item_count+1, rate_count+1, args.embed_dim).to(device)
 
-    if args.test:
+    if args.test or args.test_subset:
         print('Load checkpoint and testing...')
-        ckpt = torch.load(args.checkpoint)
-        model.load_state_dict(ckpt['state_dict'])
-        mae, rmse = validate(test_loader, model)
-        print("Test: MAE: {:.4f}, RMSE: {:.4f}".format(mae, rmse))
+
+        # include all the models
+        fn_list = args.checkpoint
+        if args.checkpoint == []:
+            for fn in os.listdir('training_results/'):
+                if fn.startswith('best'):
+                    fn_list.append(fn)
+        
+        for fn in fn_list:
+            print("Test on: " + fn)
+            ckpt = torch.load('training_results/' + fn)
+            model.load_state_dict(ckpt['state_dict'])
+            mae, rmse = validate(test_loader, model)
+            print("Test: MAE: {:.4f}, RMSE: {:.4f}".format(mae, rmse))
         return
 
     optimizer = optim.RMSprop(model.parameters(), args.lr) 
@@ -89,7 +101,6 @@ def main():
     if(args.delta < 0.0):
         print('Error: delta must be positive')
         exit(-1)
-
 
 
     if(args.loss_func.lower() == 'mse'):
