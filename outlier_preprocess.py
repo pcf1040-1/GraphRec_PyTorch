@@ -56,13 +56,13 @@ def subset_outlier(path, fn, threshold,):
 		new_fn = 'dataset_subset_' + args.greater_or_less + str(threshold) + '.pkl'
 		with open(path + new_fn, 'wb') as n_f:
 			print("Saving file in " + path + new_fn +'...')
-			pickle.dump(new_df, n_f, pickle.HIGHEST_PROTOCOL)
+			pickle.dump(new_df.values.tolist(), n_f, pickle.HIGHEST_PROTOCOL)
 
 
 def main():
 	# Run test for Epinions
 	for thr in args.threshold:
 		subset_outlier(path=args.dataset_path, fn=args.data_name, threshold=thr)
-	
+		
 if __name__ == '__main__':
     main()

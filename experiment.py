@@ -57,7 +57,6 @@ def main():
             train_set = pickle.load(f)
             valid_set = pickle.load(f)
         test_set = pickle.load(f)
-        test_set = test_set.values.tolist()	# convert dataframe to list (to input correct format for GRdataset)
 
     with open(args.dataset_path + 'list.pkl', 'rb') as f:
         u_items_list = pickle.load(f)
