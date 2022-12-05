@@ -19,7 +19,7 @@ def read_epinion_data():
     sep=' ', header=None, names=["user", "item", "rating"])
     return df
 
-def plt_loss_dist_2():
+def plt_loss_dist():
     df = pd.read_csv('loss_data.csv', sep = ',')
     color = ['#4a708b', '#e9b900', '#556a0c', '#be3455', '#7f5a83']
     count = 1
@@ -91,27 +91,10 @@ def plt_loss_dist_2():
     plt.savefig("RMSE_Less.pdf")
     plt.close()
 
-
-
-def plot_loss_dist():
-    df = pd.read_csv('loss_data.csv', sep = ',')
-    for idx in range(3, df.shape[1]):
-        columnSeriesObj = df.iloc[:, idx]
-        max_y_lim = max(df['MAE for Complete Set']) + 0.01
-        min_y_lim = min(df['MAE for Complete Set']) - 0.01
-        plt.ylim(min_y_lim, max_y_lim)
-        plt.bar(df['Delta'], df['MAE for Complete Set'], width=0.8, 
-            bottom=None, align='center', linewidth=0.1, color = '#6497b1', edgecolor='black')
-        plt.xlabel("Delta")
-        plt.ylabel("z score for users")
-        plt.savefig("test.pdf")
-        plt.close()
-
 def main():
     df = read_epinion_data()
     plot_z_score(df)
-    plot_loss_dist()
-    plt_loss_dist_2()
+    plt_loss_dist()
     
 
 if __name__ == '__main__':
