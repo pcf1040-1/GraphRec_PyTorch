@@ -48,7 +48,7 @@ def subset_outlier(path, fn, threshold,):
 		if args.greater_or_less=='less':
 			new_df = df[abs(df['zscore']) <= 1].reset_index()
 		elif args.greater_or_less=='greater':
-			new_df = df[abs(df['zscore']) <= 1].reset_index()
+			new_df = df[abs(df['zscore']) >= 1].reset_index()
 
 		new_df = new_df[['user', 'item', 'rating']]
 
