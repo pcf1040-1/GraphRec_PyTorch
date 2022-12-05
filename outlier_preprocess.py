@@ -38,17 +38,17 @@ def subset_outlier(path, fn, threshold,):
 		df_user['zscore'] = zscore(df_user['average_rating'])
 
 		# include a user id only if within threshold
-		subset = []
-		for index, row in df_user.iterrows():
-			if abs(row['zscore']) <= threshold:
-				subset.append(row['user'])
+		# subset = []
+		# for index, row in df_user.iterrows():
+		# 	if abs(row['zscore']) <= threshold:
+		# 		subset.append(row['user'])
 		
 		df = df.join(df_user.set_index('user'), on='user')
 
 		if args.greater_or_less=='less':
-			new_df = df[abs(df['zscore']) <= 1].reset_index()
+			new_df = df[abs(df['zscore']) <= threshold].reset_index()
 		elif args.greater_or_less=='greater':
-			new_df = df[abs(df['zscore']) >= 1].reset_index()
+			new_df = df[abs(df['zscore']) >= threshold].reset_index()
 
 		new_df = new_df[['user', 'item', 'rating']]
 
