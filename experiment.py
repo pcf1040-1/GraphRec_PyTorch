@@ -81,8 +81,8 @@ def main():
         print(args.checkpoint)
 
         # include all the models
-        fn_list = args.checkpoint
-        if args.checkpoint == all:
+        fn_list = []
+        if args.checkpoint == 'all':
             for fn in os.listdir('training_results/'):
                 if fn.startswith('best'):
                     fn_list.append(fn)
