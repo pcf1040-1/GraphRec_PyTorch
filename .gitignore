@@ -1,6 +1,7 @@
 # Gitignore for project here
 *.pdf
 *.tar
+/datasets
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
