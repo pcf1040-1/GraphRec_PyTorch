@@ -43,7 +43,7 @@ parser.add_argument('--test', action='store_true', help='test')
 parser.add_argument('--test_subset', action='store_true', help='test subset files')
 parser.add_argument('--loss_func', default='MSE', help='loss function to use during training [MSE|huber]')
 parser.add_argument('--delta', type=float, default='1.0', help='delta hyperparameter for Huber loss')
-parser.add_argument('--checkpoint', default=[], type=list, help = 'checkpoint to start at, defaults starts all the best checkpoints')
+parser.add_argument('--checkpoint', default='all', nargs='+',  help = 'checkpoint to start at, defaults starts all the best checkpoints')
 args = parser.parse_args()
 print(args)
 
@@ -78,14 +78,17 @@ def main():
 
     if args.test or args.test_subset:
         print('Load checkpoint and testing...')
+        print(args.checkpoint)
 
         # include all the models
         fn_list = args.checkpoint
-        if args.checkpoint == []:
+        if args.checkpoint == all:
             for fn in os.listdir('training_results/'):
                 if fn.startswith('best'):
                     fn_list.append(fn)
-        fn_list.sort()
+            fn_list.sort()
+        else:
+            fn_list = args.checkpoint
         
         for fn in fn_list:
             print("Test on: " + fn)
