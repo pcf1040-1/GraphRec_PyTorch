@@ -1,0 +1,22 @@
+Namespace(dataset_path='datasets/Epinions/', data_name='dataset.pkl', batch_size=256, embed_dim=64, epoch=30, lr=0.001, lr_dc=0.1, lr_dc_step=30, test=True, test_subset=False, loss_func='MSE', delta=1.0, checkpoint=[])
+Loading data...
+Load checkpoint and testing...
+Test on: best_checkpointhuber0.5.pth.tar
+Test: MAE: 0.8055, RMSE: 1.1548
+Test on: best_checkpointhuber1.0.pth.tar
+Test: MAE: 0.8621, RMSE: 1.2045
+Test on: best_checkpointhuber1.5.pth.tar
+Test: MAE: 0.8539, RMSE: 1.1860
+Dataset: dataset.pkl
+
+
+
+
+
+
+
+
+
+
+
+
