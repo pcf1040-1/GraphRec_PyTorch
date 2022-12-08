@@ -4,7 +4,7 @@
 Created on 30 Sep, 2019
 
 @author: wangshuo
-@author: Patrick Flynn
+@author: Patrick Flynn, Jack Oh
 """
 
 import os

@@ -1,3 +1,6 @@
+"""
+@author: Jack Oh
+"""
 import os
 
 file_list = os.listdir('datasets/Epinions/')

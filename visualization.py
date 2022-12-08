@@ -64,7 +64,7 @@ def plt_first_exp():
         count += 1
     plt.xlabel("Delta")
     plt.ylabel("MAE")
-    plt.title("MAE on Entire Set and Subsets Less Than Z Scores")
+    plt.title("MAE results with different datasets")
     plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
     plt.tight_layout()
     plt.savefig("exp_result/first_exp_MAE_Less.pdf")
@@ -78,7 +78,7 @@ def plt_second_exp():
     plt.xticks(rotation=45, ha='right')
     plt.xlabel("Delta")
     plt.ylabel("MAE")
-    plt.title("Entire Set Loss for Second Experiment")
+    plt.title("MAE results with additional models")
     plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
     plt.tight_layout()
     plt.savefig("exp_result/second_exp.pdf")
