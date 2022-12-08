@@ -1,10 +1,9 @@
-# load the pickle file and get test set
+"""
+Created on 30 Sep, 2019
 
-# compute z score
-
-# select the rows only if within the threshold
-
-# save the new pickle file in path
+@author: wangshuo
+@author: Jack Oh
+"""
 
 import pandas as pd
 import pickle
