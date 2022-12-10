@@ -1,8 +1,8 @@
 """
-Created on 30 Sep, 2019
-
-@author: wangshuo
 @author: Jack Oh
+
+This code will create a subset of our original test set by selecting the points if zsocre is greater than threshold.
+The file will be saved as pickle file.
 """
 
 import pandas as pd
@@ -32,18 +32,13 @@ def subset_outlier(path, fn, threshold,):
 
 		df = pd.DataFrame(test_set, columns = ["user", "item", "rating"])
 
-		# compute z score
+		# Compute z score
 		df_user = df.groupby(['user'])['rating'].mean().reset_index(name='average_rating')
 		df_user['zscore'] = zscore(df_user['average_rating'])
-
-		# include a user id only if within threshold
-		# subset = []
-		# for index, row in df_user.iterrows():
-		# 	if abs(row['zscore']) <= threshold:
-		# 		subset.append(row['user'])
 		
 		df = df.join(df_user.set_index('user'), on='user')
 
+		# Select if zscore is greater than threshold
 		if args.greater_or_less=='less':
 			new_df = df[abs(df['zscore']) <= threshold].reset_index()
 		elif args.greater_or_less=='greater':
@@ -51,7 +46,7 @@ def subset_outlier(path, fn, threshold,):
 
 		new_df = new_df[['user', 'item', 'rating']]
 
-		# save the pickle file
+		# Save the pickle file
 		new_fn = 'dataset_subset_' + args.greater_or_less + str(threshold) + '.pkl'
 		with open(path + new_fn, 'wb') as n_f:
 			print("Saving file in " + path + new_fn +'...')

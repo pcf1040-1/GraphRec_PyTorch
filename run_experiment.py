@@ -1,5 +1,7 @@
 """
 @author: Jack Oh
+
+This code test all the models with all the dataset in 'datasets/Epinions/' directory.
 """
 import os
 
@@ -13,5 +15,4 @@ for data_name in file_list:
     elif data_name=='dataset.pkl':
         print("Dataset: "+ data_name)
         os.system("python experiment.py --test --data_name dataset.pkl")
-    
     print('\n\n')

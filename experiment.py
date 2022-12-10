@@ -1,10 +1,11 @@
 #!/usr/bin/env python37
 # -*- coding: utf-8 -*-
 """
-Created on 30 Sep, 2019
-
 @author: wangshuo
 @author: Patrick Flynn, Jack Oh
+
+This code is modified version of main.py in the same directory so we can train with different loss functions and test with different sets.
+You can specify loss functions and test set via command line arguments.
 """
 
 import os
