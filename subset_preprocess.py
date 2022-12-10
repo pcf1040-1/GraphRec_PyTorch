@@ -35,6 +35,7 @@ def subset_outlier(path, fn, threshold,):
 		# Compute z score
 		df_user = df.groupby(['user'])['rating'].mean().reset_index(name='average_rating')
 		df_user['zscore'] = zscore(df_user['average_rating'])
+
 		
 		df = df.join(df_user.set_index('user'), on='user')
 

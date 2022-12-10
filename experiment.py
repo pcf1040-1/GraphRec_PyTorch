@@ -118,6 +118,9 @@ def main():
 
     scheduler = StepLR(optimizer, step_size = args.lr_dc_step, gamma = args.lr_dc)
 
+    if not os.path.isdir('training_results'):
+        os.mkdir('training_results')
+
     for epoch in tqdm(range(args.epoch)):
         # train for one epoch
         scheduler.step(epoch = epoch)
