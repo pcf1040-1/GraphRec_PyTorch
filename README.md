@@ -30,7 +30,7 @@ python subset_preprocess.py --threshold 0.5 1 1.5 2
 
 4. Train models with different loss functions.
 Already trained model checkpoints can be downloaded [here](https://drive.google.com/file/d/1uplhC3elHRqEZWyOZaZahj0gf9Dk8aZc/view?usp=share_link).
-These files contain the best checkpoints for models trained with varying hyperparameters and lossfunctions.
+These files contain the best checkpoints for models trained with varying hyperparameters and loss functions.
 
 If you want to train a new model:
 
