@@ -45,7 +45,8 @@ python experiment.py --dataset_path=datasets/Epinions/ --loss_func=huber --delta
 ```
 
 
-5. Testing 
+5. Testing: 
+
 If you want to run a test on all the models and all the test sets, running this command will find the folder **training_results** for models and "datasets/Epinions/" and run tests for all existing models and test sets.
 ```bash
 python run_experiment.py
