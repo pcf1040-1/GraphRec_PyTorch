@@ -18,7 +18,7 @@ from utils import collate_fn
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_path', default='datasets/Epinions/', help='dataset directory path: datasets/Ciao/Epinions')
 parser.add_argument('--threshold', default=1, nargs="+", type=float, help='threshold for zscore of subset, take a list as input')
-parser.add_argument('--greater_or_less', default='less', help='determine to include the data if the absolute value of zscore is greater or less')
+parser.add_argument('--greater_or_less', default='greater', help='determine to include the data if the absolute value of zscore is greater or less')
 parser.add_argument('--data_name', default='dataset.pkl', help='name of the dataset pkl file to use')
 args = parser.parse_args()
 print(args)
