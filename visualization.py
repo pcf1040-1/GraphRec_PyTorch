@@ -50,26 +50,9 @@ def plt_first_exp():
     plt.title("MAE on Entire Set and Subsets Greater Than Z Scores")
     plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
     plt.tight_layout()
-    plt.savefig("exp_result/first_exp_MAE_Greater.pdf")
+    plt.savefig("exp_result/first_exp.pdf")
     plt.close()
 
-    # Second plot: less than, MAE
-    count = 1
-    for idx in range(8, 12):
-        if idx == 8:
-            plt.plot(df['Delta'], df['MAE for Complete Set'], '-o', 
-            color = color[0], label = "Entire Set")
-        name = df.columns[idx]
-        col = df.iloc[:, idx]
-        plt.plot(df['Delta'], col, '-o',color = color[count], label = name.split(" ")[2])
-        count += 1
-    plt.xlabel("Delta")
-    plt.ylabel("MAE")
-    plt.title("MAE results with different datasets")
-    plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
-    plt.tight_layout()
-    plt.savefig("exp_result/first_exp_MAE_Less.pdf")
-    plt.close()
 
 # Plot the second experiment, this is the plot with the loss on the entire dataset only
 def plt_second_exp():
