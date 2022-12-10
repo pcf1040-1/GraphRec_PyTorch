@@ -36,11 +36,6 @@ def subset_outlier(path, fn, threshold,):
 		df_user = df.groupby(['user'])['rating'].mean().reset_index(name='average_rating')
 		df_user['zscore'] = zscore(df_user['average_rating'])
 
-		# include a user id only if within threshold
-		# subset = []
-		# for index, row in df_user.iterrows():
-		# 	if abs(row['zscore']) <= threshold:
-		# 		subset.append(row['user'])
 		
 		df = df.join(df_user.set_index('user'), on='user')
 
