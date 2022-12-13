@@ -30,7 +30,7 @@ python subset_preprocess.py --threshold 0.5 1 1.5 2
 
 4. Train models with different loss functions.
 Already trained model checkpoints can be downloaded [here](https://drive.google.com/file/d/1uplhC3elHRqEZWyOZaZahj0gf9Dk8aZc/view?usp=share_link).
-These files contain the best checkpoints for models trained with varying hyperparameters and loss functions.
+These files contain the best checkpoints for models trained with varying hyperparameters and loss functions. Save these checkpoints in **training_results**.
 
 If you want to train a new model:
 
@@ -43,6 +43,8 @@ For Huber Loss:
 ```bash
 python experiment.py --dataset_path=datasets/Epinions/ --loss_func=huber --delta={delta_value}
 ```
+
+The trained model will be saved in **training_results** folder
 
 
 5. Testing: 
@@ -61,7 +63,7 @@ python experiment.py --test --data_name dataset.pkl
 
 For a subset test set:
 ```bash
-python experiment.py --test_subset --data_name [test subset name]
+python experiment.py --test_subset --data_name test_subset_name
 ```
 
 6. To create a plot, you will need to run visualization.py. If you want to make a plot with different data, you will need to update "first_exp.csv" and "second_exp.csv".
